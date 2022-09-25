@@ -1,0 +1,197 @@
+close all;
+clearvars;
+clc;
+tic;
+N=1000;
+bits1=randi([0,1],1,N);
+bits2=randi([0,1],1,N);
+bits3=randi([0,1],1,N);
+bits4=randi([0,1],1,N);
+reall=zeros(1,N);
+img=zeros(1,N);
+for k=1:N
+   if(bits1(k)==0 && bits2(k)==0 && bits3(k)==0&&bits4(k)==0)
+        reall(k)=1;
+        img(k)=1;
+ 
+    elseif(bits1(k)==0 && bits2(k)==0 && bits3(k)==0&&bits4(k)==1)
+        reall(k)=1;
+        img(k)=3;
+       
+       
+     elseif(bits1(k)==0 && bits2(k)==0 && bits3(k)==1&&bits4(k)==0)
+        reall(k)=3;
+        img(k)=1;
+           
+     elseif(bits1(k)==0 && bits2(k)==0 && bits3(k)==1&&bits4(k)==1)
+        reall(k)=3;
+        img(k)=3;
+               
+     elseif(bits1(k)==0 && bits2(k)==1 && bits3(k)==0&&bits4(k)==0)
+        reall(k)=1;
+        img(k)=-1;
+               
+     elseif(bits1(k)==0 && bits2(k)==1 && bits3(k)==0&&bits4(k)==1)
+        reall(k)=1;
+        img(k)=-3;
+               
+     elseif(bits1(k)==0 && bits2(k)==1 && bits3(k)==1&&bits4(k)==0)
+        reall(k)=3;
+        img(k)=-1;
+               
+     elseif(bits1(k)==0 && bits2(k)==1 && bits3(k)==1&&bits4(k)==1)
+        reall(k)=3;
+        img(k)=-3;
+      elseif(bits1(k)==1 && bits2(k)==0 && bits3(k)==0&&bits4(k)==0)
+          reall(k)=-1;
+        img(k)=1;
+      elseif(bits1(k)==1 && bits2(k)==0 && bits3(k)==0&&bits4(k)==1)
+          reall(k)=-1;
+        img(k)=3;
+      elseif(bits1(k)==1 && bits2(k)==0 && bits3(k)==1&&bits4(k)==0)
+          reall(k)=-3;
+        img(k)=1;
+      elseif(bits1(k)==1 && bits2(k)==0 && bits3(k)==1&&bits4(k)==1)
+          reall(k)=-3;
+        img(k)=3;
+      elseif(bits1(k)==1 && bits2(k)==1 && bits3(k)==0&&bits4(k)==0)
+          reall(k)=-1;
+        img(k)=-1;
+      elseif(bits1(k)==1 && bits2(k)==1 && bits3(k)==0&&bits4(k)==1)
+          reall(k)=-1;
+        img(k)=-3;
+      elseif(bits1(k)==1 && bits2(k)==1 && bits3(k)==1&&bits4(k)==0)
+          reall(k)=-3;
+        img(k)=-1;
+      elseif(bits1(k)==1 && bits2(k)==1 && bits3(k)==1&&bits4(k)==1)
+          reall(k)=-3;
+        img(k)=-3;
+    end
+end
+
+ S=(1/sqrt(10))*(reall+1j*img);
+SNR=0:1:20;
+SNRL=10.^(SNR/10);
+n=1./SNRL;
+y=zeros(length(SNRL),N);
+ber1=zeros(length(SNRL),N);
+ber2=zeros(length(SNRL),N);
+ber3=zeros(length(SNRL),N);
+ber4=zeros(length(SNRL),N);
+ber=zeros(1,length(SNRL));
+RX_r=zeros(length(SNRL),N);
+RX_i=zeros(length(SNRL),N);
+bitsRX1=zeros(1,N);
+bitsRX2=zeros(1,N);
+bitsRX3=zeros(1,N);
+bitsRX4=zeros(1,N);
+
+for i=1:length(SNRL)
+    noise= sqrt(n(i)/2)*(randn(1,N)+1j*randn(1,N));
+    y(i,:)=S+noise;
+end
+
+for i=1:length(SNRL)
+    for j=1:N
+       RX_r=real(y);
+       RX_i=imag(y);
+   if((RX_r(i,j)<=(2/sqrt(10))&&RX_r(i,j)>=0)&&(RX_i(i,j)<=(2/sqrt(10))&&RX_i(i,j)>=0))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=0;
+    elseif((RX_r(i,j)<=(2/sqrt(10))&&RX_r(i,j)>=0)&&(RX_i(i,j)>(2/sqrt(10))))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=1;
+       
+    elseif(RX_r(i,j)>(2/sqrt(10))&&(RX_i(i,j)<=(2/sqrt(10))&&RX_i(i,j)>=0))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=0;        
+    elseif(RX_r(i,j)>(2/sqrt(10))&&RX_i(i,j)>(2/sqrt(10)))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=1;      
+   elseif((RX_r(i,j)<=(2/sqrt(10))&&RX_r(i,j)>=0)&&(RX_i(i,j)>=(-2/sqrt(10))&&RX_i(i,j)<0))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=0;      
+        elseif((RX_r(i,j)<=(2/sqrt(10))&&RX_r(i,j)>=0)&&(RX_i(i,j)<(-2/sqrt(10))))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=1;      
+        elseif(RX_r(i,j)>(2/sqrt(10))&&(RX_i(i,j)>=(-2/sqrt(10))&&RX_i(i,j)<0))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=0;      
+        elseif(RX_r(i,j)>(2/sqrt(10))&&RX_i(i,j)<(-2/sqrt(10)))
+        bitsRX1(i,j)=0;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=1;
+        elseif((RX_r(i,j)>=(-2/sqrt(10))&&RX_r(i,j)<0)&&(RX_i(i,j)<=(2/sqrt(10))&&RX_i(i,j)>=0))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=0;
+        elseif((RX_r(i,j)>=(-2/sqrt(10))&&RX_r(i,j)<0)&&RX_i(i,j)>(2/sqrt(10)))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=1;
+        elseif(RX_r(i,j)<(-2/sqrt(10))&&(RX_i(i,j)<=(2/sqrt(10))&&RX_i(i,j)>=0))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=0;
+        elseif(RX_r(i,j)<(-2/sqrt(10))&&RX_i(i,j)>(2/sqrt(10)))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=0;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=1;
+        elseif((RX_r(i,j)>=(-2/sqrt(10))&&RX_r(i,j)<0)&&(RX_i(i,j)>=(-2/sqrt(10))&&RX_i(i,j)<0))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=0;
+        elseif((RX_r(i,j)>=(-2/sqrt(10))&&RX_r(i,j)<0)&&RX_i(i,j)<(-2/sqrt(10)))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=0;
+        bitsRX4(i,j)=1;
+        elseif(RX_r(i,j)<(-2/sqrt(10))&&(RX_i(i,j)>=(-2/sqrt(10))&&RX_i(i,j)<0))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=0;
+        elseif(RX_r(i,j)<(-2/sqrt(10))&&RX_i(i,j)<(-2/sqrt(10)))
+        bitsRX1(i,j)=1;
+        bitsRX2(i,j)=1;
+        bitsRX3(i,j)=1;
+        bitsRX4(i,j)=1;
+   end
+    end
+    ber1(i,:)=(bitsRX1(i,:)~=bits1);
+    ber2(i,:)=(bitsRX2(i,:)~=bits2);
+    ber3(i,:)=(bitsRX3(i,:)~=bits3);
+    ber4(i,:)=(bitsRX4(i,:)~=bits4);
+    ber(i)=(sum(ber1(i,:))+sum(ber2(i,:))+sum(ber3(i,:))+sum(ber4(i,:)))/(4*N);
+end
+
+BER_th =3/8*erfc(sqrt(0.1*SNRL));
+figure(1);
+semilogy(SNR, BER_th,'r-')  
+hold on
+semilogy(SNR, ber,'k*')
+xlabel('SNR[dB]')                                    
+ylabel('Bit Error Rate');                                        
+legend('Theoretical', 'Simulated');
+grid on;
+hold off;

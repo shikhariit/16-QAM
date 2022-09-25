@@ -1,0 +1,43 @@
+close all;
+clearvars;
+clc;
+tic;
+N = 1e6;
+bits = randsrc(1,N,[-3 -1 1 3]) + 1j*randsrc(1,N,[-3 -1 1 3]);
+SNR = 0:20;
+SNRL=10.^(SNR/10);
+n=1./SNRL;
+bitsRX = zeros(1,N);
+bitsRX_re = zeros(1,N);
+bitsRX_im = zeros(1,N);
+err=zeros(1,length(SNRL));
+ynorm=zeros(1,N);
+for i = 1:length(SNR)
+    S = (1/sqrt(10))*bits; 
+    noise = sqrt(n(i)/2)*(randn(1,N) + 1j*randn(1,N)); 
+    h= sqrt(1/2)*(randn(1,N)+1j*randn(1,N));
+    y = h.*S + noise; 
+    ynorm=y./h;
+    y_re = real(ynorm);
+    y_im = imag(ynorm);
+
+    bitsRX_re(y_re< -2/sqrt(10))           = -3;
+    bitsRX_re(y_re > 2/sqrt(10))           =  3;
+    bitsRX_re(y_re>-2/sqrt(10) & y_re<=0)  = -1;
+    bitsRX_re(y_re>0 & y_re<=2/sqrt(10))   =  1;
+    bitsRX_im(y_im< -2/sqrt(10))           = -3;
+    bitsRX_im(y_im > 2/sqrt(10))           =  3;
+    bitsRX_im(y_im>-2/sqrt(10) & y_im<=0)  = -1;
+    bitsRX_im(y_im>0 & y_im<=2/sqrt(10))   =  1;
+    bitsRX = bitsRX_re + 1j*bitsRX_im;
+    err(i) = size(find((bits- bitsRX)),2); 
+end
+ber=err/(4*N);
+close all
+figure
+hold on
+semilogy(SNR,ber,'k*');
+grid on
+xlabel('SNR, dB')
+ylabel('Bit Error Rate')
+
